@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive Body → Departments → Doctors (WORKING)</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF7EE; --ink:#4e3f25; --muted:#97855e;
+    --line:#E8DFC9; --card:#EDE2CB; --card2:#F3E9D4;
+    --pill:#B89A5D; --accent:#EB9C3C; --white:#fff;
+    --shadow:0 16px 28px rgba(112,80,33,.10);
+    --bone:#F9F7F1; --bone-line:#C8B89A;
+    --focus:#1f6feb;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:linear-gradient(120deg,#FAF7EE 60%,#f7e3b7 100%);
+    color:var(--ink);
+    font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:1400px;
+    margin:16px auto;
+    padding:12px;
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
+  }
+  header{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:20px;
+    margin:12px 0 16px;
+    background:linear-gradient(90deg,#ffe0b3 60%,#f3e9d4 100%);
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(235,156,60,.10);
+    padding:12px 0;
+  }
+  header h2{
+    margin:0;
+    font-size:22px;
+    font-weight:700;
+    color:#a67c2d;
+    letter-spacing:.3px;
+    text-shadow:0 2px 8px #f3e9d4;
+  }
+  .grid{
+    display:grid;
+    gap:20px;
+    align-items:start;
+    justify-content:center;
+    grid-template-columns:clamp(400px,40vw,600px) clamp(240px,20vw,320px) clamp(280px,25vw,400px);
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
+    padding:20px 16px;
+    margin:0 auto 20px auto;
+    overflow:hidden;
+    max-width:1400px;
+  }
+  .bodycol,.deptcol,.doccol{
+    background:rgba(255,255,255,0.98);
+    border-radius:16px;
+    box-shadow:0 3px 12px rgba(160,130,70,.08);
+    padding:16px 14px;
+    min-height:1000px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .bodycol {
+    background:rgba(255,255,255,0.98);
+    box-shadow:0 3px 12px rgba(160,130,70,.08);
+    border-radius:16px;
+    border:none;
+    min-height:1050px;
+  }
+  .deptcol, .doccol {
+    min-height:850px;
+  }
+  .figureArea{
+    display:grid;
+    grid-template-columns:110px 1fr 110px;
+    gap:15px;
+    align-items:start;
+    justify-items:center;
+    margin-bottom:15px;
+    width:100%;
+    max-width:800px;
+    margin:0 auto 15px auto;
+  }
+  .figure{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    min-height:950px;
+    background:none;
+    border:none;
+    border-radius:0;
+    padding:10px 15px;
+    margin:0 auto;
+  }
+  .labels{
+    display:grid;
+    gap:8px;
+    align-content:start;
+    justify-content:center;
+    margin-top:0;
+    padding-top:0;
+  }
+  .labels button{
+    appearance:none;
+    border:1px solid #e8dfc9;
+    background:rgba(255,255,255,0.8);
+    color:#7a531b;
+    font-size:12px;
+    padding:6px 8px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:all .15s;
+    text-align:right;
+  }
+  .labels.right button{text-align:left}
+  .labels button:hover{background:#f7c873;border-color:#eb9c3c;color:#4e3f25;transform:translateY(-1px)}
+  .labels button.active{background:#eb9c3c;color:#fff;border-color:#eb9c3c;font-weight:600}
+  
+  /* Enhanced selection styling for buttons */
+  .labels button.selected {
+    background: linear-gradient(135deg, #d62828, #e63946);
+    color: #fff;
+    border-color: #d62828;
+    font-weight: bold;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230,57,70,0.3);
+    animation: buttonSelected 0.3s ease-out;
+  }
+  
+  .labels button.clicked {
+    transform: scale(0.95) translateY(-1px);
+  }
+  
+  @keyframes buttonSelected {
+    0% { transform: scale(1) translateY(0); box-shadow: 0 0 0 rgba(230,57,70,0); }
+    50% { transform: scale(1.05) translateY(-3px); box-shadow: 0 6px 16px rgba(230,57,70,0.4); }
+    100% { transform: scale(1) translateY(-2px); box-shadow: 0 4px 12px rgba(230,57,70,0.3); }
+  }
+  .deptgrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+    gap:20px;
+    align-content:start;
+    justify-content:start;
+    margin-top:12px;
+  }
+  .dept{
+    background:linear-gradient(90deg,#f7c873 60%,#f3e9d4 100%);
+    color:#7a531b;
+    border:1.5px solid #eb9c3c;
+    font-weight:600;
+    font-size:15px;
+    box-shadow:0 2px 8px rgba(235,156,60,.12);
+    transition:background .18s, color .18s, box-shadow .18s;
+    border-radius:14px;
+    min-height:80px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:12px;
+    cursor:pointer;
+  }
+  .dept:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 4px 14px rgba(235,156,60,.18);background:linear-gradient(120deg,#ffe0b3 60%,#f3e9d4 100%);}
+  .dept.active{background:linear-gradient(90deg,#eb9c3c 60%,#ffe0b3 100%);border-color:#eb9c3c;color:#fff;font-weight:700;box-shadow:0 3px 12px rgba(235,156,60,.22);}
+  .dept span{font-weight:600;letter-spacing:.3px}
+  .doccol{
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    width:100%;
+  }
+  .doclist{
+    height:420px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-right:6px;
+    margin-top:8px;
+    width:100%;
+  }
+  .doccard{
+    background:linear-gradient(120deg,#f2ead5 60%,#ede2c7 100%);
+    border:1.5px solid #eadfc5;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+    border-radius:12px;
+    display:grid;
+    grid-template-columns:48px minmax(0,1fr) minmax(90px, auto);
+    gap:10px;
+    align-items:center;
+    padding:12px;
+    margin-bottom:12px;
+    box-shadow:0 2px 8px rgba(160,130,70,.10);
+    transition:box-shadow .15s, transform .15s;
+  }
+  .docmeta{
+    min-width:0;
+    overflow:hidden;
+  }
+  .doccard:hover{box-shadow:0 8px 24px rgba(235,156,60,.18);transform:scale(1.02);background:linear-gradient(120deg,#ffe0b3 60%,#f3e9d4 100%);}
+  .avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;border:1.5px solid #e7dcc2;background:#fff}
+  .docmeta .name{font-weight:600;font-size:17px;color:#604b2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .docmeta .sub{font-size:13px;color:#8a7a58;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .book{appearance:none;border:0;background:#b99a5c;color:#fff;border-radius:12px;padding:10px 16px;cursor:pointer;font-weight:600;min-width:90px;transition:background .18s;}
+  .book:hover{background:#a07e4c;}
+  .empty{color:#8a7a58;text-align:center;padding:20px}
+  @media (max-width:1200px){
+    .grid{grid-template-columns:1fr;gap:24px;padding:18px;}
+    .bodycol,.deptcol,.doccol{min-height:unset;padding:18px 8px;}
+    .deptgrid{grid-template-columns:1fr;}
+    .doclist{height:auto;max-height:none;}
+    .figureArea{grid-template-columns:1fr}
+    .labels{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .labels button{text-align:left}
+  }
+  #tooltip{
+    position:absolute;
+    background:rgba(0,0,0,0.8);
+    color:#fff;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    pointer-events:none;
+    z-index:1000;
+    opacity:0;
+    transition:opacity .15s;
+  }
+  .announce{
+    position:absolute;
+    left:-9999px;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+  }
+  .genderToggle {
+    display:flex;
+    margin:10px auto 15px auto;
+    justify-content:center;
+    gap:12px;
+  }
+  .genderToggle button {
+    flex:0 0 140px;
+    padding:12px 18px;
+    border:2px solid var(--line);
+    background:linear-gradient(135deg,#f7f4f0 0%,#f0ebe5 50%,#e8e2db 100%);
+    color:#6b5b45;
+    cursor:pointer;
+    font-weight:700;
+    font-size:15px;
+    box-shadow:0 4px 12px rgba(235,156,60,.15);
+    transition:all .3s ease;
+    border-radius:12px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .genderToggle button:hover {
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(235,156,60,.25);
+    background:linear-gradient(135deg,#f2ead5 0%,#ede2c7 50%,#e6ddc4 100%);
+  }
+  .genderToggle button.active {
+    background:linear-gradient(135deg,#74b9ff 0%,#0984e3 50%,#2d3436 100%);
+    color:#fff;
+    border-color:#0984e3;
+    box-shadow:0 6px 20px rgba(116,185,255,.35);
+    transform:translateY(-2px) scale(1.02);
+  }
+  .labels button {
+    background:linear-gradient(90deg,#f7c873 60%,#f3e9d4 100%);
+    color:#7a531b;
+    border:1.5px solid #eb9c3c;
+    font-weight:600;
+    font-size:15px;
+    box-shadow:0 2px 8px rgba(235,156,60,.12);
+    transition:background .18s, color .18s, box-shadow .18s;
+  }
+  .labels button.active {
+    background:linear-gradient(90deg,#eb9c3c 60%,#ffe0b3 100%);
+    color:#fff;
+    border-color:#eb9c3c;
+    box-shadow:0 4px 16px rgba(235,156,60,.22);
+  }
+  .dept {
+    background:linear-gradient(90deg,#f7c873 60%,#f3e9d4 100%);
+    color:#7a531b;
+    border:1.5px solid #eb9c3c;
+    font-weight:600;
+    font-size:18px;
+    box-shadow:0 2px 8px rgba(235,156,60,.12);
+    transition:background .18s, color .18s, box-shadow .18s;
+  }
+  .dept.active {
+    background:linear-gradient(90deg,#eb9c3c 60%,#ffe0b3 100%);
+    color:#fff;
+    border-color:#eb9c3c;
+    box-shadow:0 4px 16px rgba(235,156,60,.22);
+  }
+  .bone-fill {
+    fill:url(#boneGradient);
+    stroke:#c4a888;
+    stroke-width:0.8;
+    filter:drop-shadow(0 2px 6px rgba(0,0,0,0.12)) drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+    transition:all .4s ease;
+  }
+  /* Enhanced hover effects for both male and female skeletons */
+  .bone-region:hover .bone-fill {
+    fill:url(#boneHighlight);
+    stroke:#b59975;
+    stroke-width:2.5;
+    filter:drop-shadow(0 0 12px rgba(116,185,255,0.6)) drop-shadow(0 2px 8px rgba(0,0,0,0.15));
+    opacity: 0.9;
+    transition:all 0.3s ease;
+  }
+  
+  /* Female skeleton specific hover */
+  #female .bone-region:hover .bone-fill {
+    fill:url(#boneHighlightFemale);
+    stroke:#b59975;
+    stroke-width:2.5;
+    filter:drop-shadow(0 0 12px rgba(255,182,193,0.6)) drop-shadow(0 2px 8px rgba(0,0,0,0.15));
+    opacity: 0.9;
+    transition:all 0.3s ease;
+  }
+  
+  /* Active selection for both skeletons */
+  .bone-region.active .bone-fill,
+  .bone-region.hit:active .bone-fill {
+    fill:url(#redGradient);
+    stroke:#d62828;
+    stroke-width:3;
+    filter:drop-shadow(0 0 16px rgba(230,57,70,0.8)) drop-shadow(0 2px 12px rgba(0,0,0,0.2));
+    opacity: 1;
+    animation: pulseSelection 0.6s ease-out;
+  }
+  
+  /* Female skeleton active selection */
+  #female .bone-region.active .bone-fill,
+  #female .bone-region.hit:active .bone-fill {
+    fill:url(#redGradientFemale);
+    stroke:#d62828;
+    stroke-width:3;
+    filter:drop-shadow(0 0 16px rgba(230,57,70,0.8)) drop-shadow(0 2px 12px rgba(0,0,0,0.2));
+    opacity: 1;
+    animation: pulseSelection 0.6s ease-out;
+  }
+  .bone-region.active,
+  .bone-region.hit:active {
+    stroke:#d62828 !important;
+    stroke-width:3;
+    stroke-dasharray:none;
+    filter:drop-shadow(0 0 25px rgba(230,57,70,0.8));
+  }
+  .region .halo {
+    fill:rgba(116,185,255,0.2);
+    transition:all .3s ease;
+  }
+  .region .outline {
+    fill:none;
+    stroke:#74b9ff;
+    stroke-width:2;
+    stroke-dasharray:4,2;
+  }
+  .region:hover .halo {
+    fill:rgba(116,185,255,0.4);
+  }
+  .rib, .vert {
+    fill:#f0e6d2;
+    stroke:#d4c5a9;
+    stroke-width:1.2;
+    transition:all .3s ease;
+  }
+  .bone-region.active {
+    filter: drop-shadow(0 0 25px rgba(230,57,70,0.9)) drop-shadow(0 0 40px rgba(230,57,70,0.5));
+    animation: selectedGlow 2s ease-in-out infinite alternate;
+  }
+  
+  /* Continuous glow for selected bone without scaling */
+  @keyframes selectedGlow {
+    0% { filter: drop-shadow(0 0 15px rgba(230,57,70,0.7)) drop-shadow(0 0 30px rgba(230,57,70,0.3)); }
+    100% { filter: drop-shadow(0 0 25px rgba(230,57,70,1)) drop-shadow(0 0 40px rgba(230,57,70,0.5)); }
+  }
+  
+  /* Enhanced transitions for all bone elements */
+  .bone-fill {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .bone-stroke {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .body-svg {
+    display:none;
+    width:100%;
+    max-width:700px;
+    height:auto;
+    margin:0 auto;
+    background:transparent;
+  }
+  .body-svg.active {
+    display:block;
+  }
+  .region, .bone-region {
+    cursor:pointer;
+    transition:all .3s ease;
+  }
+  
+  /* Pulse animation for selection without scaling */
+  @keyframes pulseSelection {
+    0% { filter: drop-shadow(0 0 8px rgba(230,57,70,0.4)); opacity: 0.8; }
+    50% { filter: drop-shadow(0 0 25px rgba(230,57,70,1)); opacity: 1; }
+    100% { filter: drop-shadow(0 0 16px rgba(230,57,70,0.8)); opacity: 1; }
+  }
+  
+  /* Enhanced organ region hover effects */
+  .region:hover .halo, .bone-region:hover .bone-fill {
+    fill:url(#boneHighlight);
+    opacity:0.9;
+    filter: drop-shadow(0 0 10px rgba(116,185,255,0.5));
+  }
+  
+  /* Better active state for organ regions */
+  .region.active .outline, .bone-region.active .bone-fill {
+    fill:url(#redGradient);
+    stroke:#e63946;
+    stroke-width:3;
+    filter: drop-shadow(0 0 18px rgba(230,57,70,0.8));
+    animation: pulseSelection 0.6s ease-out;
+  }
+  /* Selection indicator and marking enhancements */
+  .bone-region.selected {
+    filter: drop-shadow(0 0 20px rgba(230,57,70,0.9)) drop-shadow(0 0 35px rgba(230,57,70,0.5));
+    animation: selectedGlow 2s ease-in-out infinite alternate;
+  }
+  
+  .bone-region.selected .bone-fill {
+    fill:url(#redGradient);
+    stroke:#d62828;
+    stroke-width:4;
+    stroke-dasharray:none;
+    opacity: 1;
+  }
+  
+  #female .bone-region.selected .bone-fill {
+    fill:url(#redGradientFemale);
+  }
+  
+  /* Visual feedback for clicked parts without scaling */
+  .bone-region.clicked {
+    animation: clickFeedback 0.3s ease-out;
+  }
+  
+  @keyframes clickFeedback {
+    0% { opacity: 1; filter: drop-shadow(0 0 8px rgba(230,57,70,0.5)); }
+    50% { opacity: 0.9; filter: drop-shadow(0 0 20px rgba(230,57,70,1)); }
+    100% { opacity: 1; filter: drop-shadow(0 0 16px rgba(230,57,70,0.8)); }
+  }
+  
+  /* Enhanced tooltip positioning for selected parts */
+  .tooltip.selection-active {
+    background: linear-gradient(135deg, #d62828, #e63946);
+    color: white;
+    font-weight: bold;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 20px rgba(230,57,70,0.4);
+  }
+  
+  .muscle-region {
+    cursor:pointer;
+    transition:all .3s ease;
+  }
+  .muscle-region:hover {
+    opacity:0.9;
+    filter: drop-shadow(0 0 8px #ff7675);
+    filter: drop-shadow(0 0 6px #ff9ff3);
+  }
+  .muscle-region.active {
+    opacity:1;
+    filter: drop-shadow(0 0 10px #e056fd);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h2>1) Select Body Part</h2>
+      <h2>2) Departments</h2>
+      <h2>3) Doctors</h2>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <section class="bodycol">
+        <!-- Gender Toggle -->
+        <div class="genderToggle">
+          <button id="male-btn" class="active">Male</button>
+          <button id="female-btn">Female</button>
+        </div>
+        
+        <div class="figureArea">
+          <!-- Left labels -->
+          <div class="labels" id="labels-left">
+            <button data-part="Eye">Eye</button>
+            <button data-part="Nose">Nose</button>
+            <button data-part="Throat">Throat</button>
+            <button data-part="Arm">Arm</button>
+            <button data-part="Liver">Liver</button>
+            <button data-part="Spine">Spine</button>
+            <button data-part="Lower Back">Lower Back</button>
+            <button data-part="Thigh">Thigh</button>
+            <button data-part="Skin">Skin</button>
+            <button data-part="Foot">Foot</button>
+          </div>
+
+          <div class="figure" aria-label="Interactive skeleton area">
+            <div id="tooltip" role="tooltip" aria-hidden="true"></div>
+            <div class="announce" aria-live="polite" id="live"></div>
+
+            <!-- MALE SKELETON -->
+            <svg id="male" class="body-svg active" viewBox="0 0 240 420" tabindex="0" aria-label="Male skeleton">
+              <defs>
+                <linearGradient id="boneGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f4f0e8"/>
+                  <stop offset="20%" stop-color="#ede5d5"/>
+                  <stop offset="50%" stop-color="#e6d7c3"/>
+                  <stop offset="80%" stop-color="#ddc9b0"/>
+                  <stop offset="100%" stop-color="#d4bb9d"/>
+                </linearGradient>
+                <linearGradient id="boneHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="rgba(244,240,232,0.9)"/>
+                  <stop offset="100%" stop-color="rgba(244,240,232,0.3)"/>
+                </linearGradient>
+                <linearGradient id="cuteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#74b9ff"/>
+                  <stop offset="50%" stop-color="#0984e3"/>
+                  <stop offset="100%" stop-color="#2d3436"/>
+                </linearGradient>
+                <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff6b6b"/>
+                  <stop offset="30%" stop-color="#ee5a52"/>
+                  <stop offset="70%" stop-color="#e63946"/>
+                  <stop offset="100%" stop-color="#d62828"/>
+                </linearGradient>
+                <filter id="boneShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.12)"/>
+                  <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.08)"/>
+                </filter>
+                <filter id="boneGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <linearGradient id="muscleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff7675"/>
+                  <stop offset="50%" stop-color="#e17055"/>
+                  <stop offset="100%" stop-color="#d63031"/>
+                </linearGradient>
+                <linearGradient id="organGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#fd79a8"/>
+                  <stop offset="50%" stop-color="#e84393"/>
+                  <stop offset="100%" stop-color="#a29bfe"/>
+                </linearGradient>
+                <filter id="boneShadow">
+                  <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#b8a082" flood-opacity="0.4"/>
+                </filter>
+                <filter id="muscleShadow">
+                  <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#d63031" flood-opacity="0.3"/>
+                </filter>
+                <filter id="glowEffect">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+
+                </filter>
+              </defs>
+              
+              <!-- Skull + jaw -->
+              <g class="bone-region hit" data-bone="Skull" tabindex="0">
+                <circle class="bone-fill" cx="120" cy="48" r="24" filter="url(#boneShadow)"/>
+                <path class="bone-stroke" d="M102 60h36 M106 66h28"/>
+                <circle cx="110" cy="52" r="3" fill="#8b6f3a"/>
+                <circle cx="130" cy="52" r="3" fill="#8b6f3a"/>
+              </g>
+              <g class="bone-region hit" data-bone="Jaw" tabindex="0">
+                <path class="bone-fill" d="M102 64 q18 10 36 0 v8 q-18 12-36 0z" filter="url(#boneShadow)"/>
+                <path class="bone-stroke" d="M102 64 q18 10 36 0"/>
+                <rect x="115" y="68" width="2" height="6" fill="#fff" rx="1"/>
+                <rect x="119" y="68" width="2" height="6" fill="#fff" rx="1"/>
+                <rect x="123" y="68" width="2" height="6" fill="#fff" rx="1"/>
+              </g>
+
+              <!-- Cervical vertebrae -->
+              <g class="bone-region hit" data-bone="Cervical Spine" tabindex="0">
+                <rect class="vert" x="116" y="74" width="8" height="6"/>
+                <rect class="vert" x="116" y="82" width="8" height="6"/>
+                <rect class="vert" x="116" y="90" width="8" height="6"/>
+              </g>
+
+              <!-- Clavicles & Scapulae -->
+              <g class="bone-region hit" data-bone="Clavicle" tabindex="0">
+                <path class="bone-stroke" d="M88 96 q16 -8 28 -6"/><path class="bone-stroke" d="M152 96 q-16 -8 -28 -6"/>
+              </g>
+              <g class="bone-region hit" data-bone="Scapula" tabindex="0">
+                <path class="bone-stroke" d="M78 112 q-8 6 -10 16"/>
+                <path class="bone-stroke" d="M162 112 q8 6 10 16"/>
+              </g>
+
+              <!-- Ribcage + sternum -->
+              <g class="bone-region hit" data-bone="Ribcage" tabindex="0">
+                <ellipse cx="120" cy="120" rx="42" ry="32" class="bone-stroke" filter="url(#boneShadow)"/>
+                <path class="rib" d="M78 112 q42 14 84 0"/>
+                <path class="rib" d="M76 120 q44 12 88 0"/>
+                <path class="rib" d="M78 128 q42 10 84 0"/>
+                <path class="rib" d="M80 136 q40 8 80 0"/>
+                <path class="rib" d="M85 144 q35 6 70 0"/>
+              </g>
+              <g class="bone-region hit" data-bone="Sternum" tabindex="0">
+                <rect class="bone-fill" x="114" y="102" width="12" height="40" rx="4" stroke="#c4a05d" filter="url(#boneShadow)"/>
+              </g>
+
+              <!-- Thoracic + Lumbar -->
+              <g class="bone-region hit" data-bone="Spine" tabindex="0">
+                <g>
+                  <rect class="vert" x="116" y="100" width="8" height="6"/><rect class="vert" x="116" y="108" width="8" height="6"/><rect class="vert" x="116" y="116" width="8" height="6"/>
+                  <rect class="vert" x="116" y="124" width="8" height="6"/><rect class="vert" x="116" y="132" width="8" height="6"/><rect class="vert" x="116" y="140" width="8" height="6"/>
+                  <rect class="vert" x="116" y="148" width="8" height="6"/><rect class="vert" x="116" y="156" width="8" height="6"/><rect class="vert" x="116" y="164" width="8" height="6"/>
+                </g>
+              </g>
+
+              <!-- Pelvis + Sacrum -->
+              <g class="bone-region hit" data-bone="Pelvis" tabindex="0">
+                <path class="bone-fill" d="M96 176 q24 18 48 0 v20 q-24 18-48 0z" stroke="var(--bone-line)"/>
+              </g>
+              <g class="bone-region hit" data-bone="Sacrum/Coccyx" tabindex="0">
+                <rect class="vert" x="118" y="170" width="4" height="16"/>
+              </g>
+
+              <!-- Arms with detailed bones -->
+              <g class="bone-region hit" data-bone="Left Humerus" tabindex="0">
+                <rect x="52" y="108" width="14" height="60" rx="7" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+              </g>
+              <g class="bone-region hit" data-bone="Left Radius/Ulna" tabindex="0">
+                <rect x="50" y="168" width="12" height="44" rx="6" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="54" y="168" width="8" height="44" rx="4" fill="none" stroke="#b89656" stroke-width="1"/>
+              </g>
+              <g class="bone-region hit" data-bone="Left Hand" tabindex="0">
+                <rect x="48" y="212" width="18" height="14" rx="4" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="50" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+                <rect x="54" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+                <rect x="58" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+                <rect x="62" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+              </g>
+
+              <g class="bone-region hit" data-bone="Right Humerus" tabindex="0">
+                <rect x="174" y="108" width="14" height="60" rx="7" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+              </g>
+              <g class="bone-region hit" data-bone="Right Radius/Ulna" tabindex="0">
+                <rect x="178" y="168" width="12" height="44" rx="6" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="178" y="168" width="8" height="44" rx="4" fill="none" stroke="#b89656" stroke-width="1"/>
+              </g>
+              <g class="bone-region hit" data-bone="Right Hand" tabindex="0">
+                <rect x="174" y="212" width="18" height="14" rx="4" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="175" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+                <rect x="179" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+                <rect x="183" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+                <rect x="187" y="215" width="3" height="8" rx="1" fill="#b89656"/>
+              </g>
+
+              <!-- Enhanced legs with detailed bones -->
+              <g class="bone-region hit" data-bone="Left Femur" tabindex="0">
+                <rect x="96" y="200" width="14" height="70" rx="7" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+              </g>
+              <g class="bone-region hit" data-bone="Right Femur" tabindex="0">
+                <rect x="130" y="200" width="14" height="70" rx="7" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+              </g>
+
+              <g class="bone-region hit" data-bone="Left Patella" tabindex="0">
+                <circle cx="103" cy="270" r="8" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+              </g>
+              <g class="bone-region hit" data-bone="Right Patella" tabindex="0">
+                <circle cx="137" cy="270" r="8" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+              </g>
+
+              <g class="bone-region hit" data-bone="Left Tibia/Fibula" tabindex="0">
+                <rect x="96" y="278" width="14" height="52" rx="6" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="100" y="278" width="6" height="52" rx="3" fill="none" stroke="#b89656" stroke-width="1"/>
+              </g>
+              <g class="bone-region hit" data-bone="Right Tibia/Fibula" tabindex="0">
+                <rect x="130" y="278" width="14" height="52" rx="6" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="134" y="278" width="6" height="52" rx="3" fill="none" stroke="#b89656" stroke-width="1"/>
+              </g>
+
+              <g class="bone-region hit" data-bone="Left Foot" tabindex="0">
+                <rect x="92" y="330" width="24" height="12" rx="5" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="94" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+                <rect x="99" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+                <rect x="104" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+                <rect x="109" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+              </g>
+              <g class="bone-region hit" data-bone="Right Foot" tabindex="0">
+                <rect x="124" y="330" width="24" height="12" rx="5" class="bone-fill" stroke="#c4a05d" filter="url(#boneShadow)"/>
+                <rect x="126" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+                <rect x="131" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+                <rect x="136" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+                <rect x="141" y="333" width="4" height="6" rx="2" fill="#b89656"/>
+              </g>
+
+              <!-- organ hotspots -->
+              <g class="region" data-part="Heart" tabindex="0"><rect class="halo" x="120" y="112" width="16" height="12" rx="3"/><rect class="outline" x="120" y="112" width="16" height="12" rx="3"/></g>
+              <g class="region" data-part="Lungs" tabindex="0"><rect class="halo" x="96" y="100" width="48" height="22" rx="6"/><rect class="outline" x="96" y="100" width="48" height="22" rx="6"/></g>
+              <g class="region" data-part="Stomach" tabindex="0"><rect class="halo" x="126" y="136" width="16" height="12" rx="4"/><rect class="outline" x="126" y="136" width="16" height="12" rx="4"/></g>
+              <g class="region" data-part="Kidneys" tabindex="0"><rect class="halo" x="98" y="146" width="44" height="12" rx="5"/><rect class="outline" x="98" y="146" width="44" height="12" rx="5"/></g>
+            </svg>
+
+            <!-- FEMALE SKELETON -->
+            <svg id="female" class="body-svg" viewBox="0 0 240 420" tabindex="0" aria-label="Female skeleton">
+              <defs>
+                <linearGradient id="boneGradientFemale" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f4f0e8"/>
+                  <stop offset="20%" stop-color="#ede5d5"/>
+                  <stop offset="50%" stop-color="#e6d7c3"/>
+                  <stop offset="80%" stop-color="#ddc9b0"/>
+                  <stop offset="100%" stop-color="#d4bb9d"/>
+                </linearGradient>
+                <linearGradient id="boneHighlightFemale" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="rgba(244,240,232,0.9)"/>
+                  <stop offset="100%" stop-color="rgba(244,240,232,0.3)"/>
+                </linearGradient>
+                <linearGradient id="redGradientFemale" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff6b6b"/>
+                  <stop offset="30%" stop-color="#ee5a52"/>
+                  <stop offset="70%" stop-color="#e63946"/>
+                  <stop offset="100%" stop-color="#d62828"/>
+                </linearGradient>
+                <filter id="boneShadowFemale" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.12)"/>
+                  <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.08)"/>
+                </filter>
+              </defs>
+              <g class="bone-region hit" data-bone="Skull" tabindex="0"><circle class="bone-fill" cx="120" cy="48" r="22" fill="url(#boneGradientFemale)" stroke="#c4a888"/><path class="bone-stroke" d="M104 58h32"/><path class="bone-stroke" d="M112 64h16"/></g>
+              <g class="bone-region hit" data-bone="Jaw" tabindex="0"><path class="bone-fill" d="M104 62 q16 8 32 0 v6 q-16 10-32 0z" fill="url(#boneGradientFemale)" stroke="#c4a888"/><path class="bone-stroke" d="M104 62 q16 8 32 0"/></g>
+              <g class="bone-region hit" data-bone="Cervical Spine" tabindex="0"><rect class="vert" x="116" y="74" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="82" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="90" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Clavicle" tabindex="0"><path class="bone-stroke" d="M90 96 q16 -8 28 -6"/><path class="bone-stroke" d="M150 96 q-16 -8 -28 -6"/></g>
+              <g class="bone-region hit" data-bone="Scapula" tabindex="0"><path class="bone-stroke" d="M80 112 q-8 6 -10 16"/><path class="bone-stroke" d="M160 112 q8 6 10 16"/></g>
+              <g class="bone-region hit" data-bone="Ribcage" tabindex="0"><ellipse cx="120" cy="118" rx="36" ry="28" class="bone-stroke"/><path class="rib" d="M86 110 q34 10 68 0"/><path class="rib" d="M84 118 q36 8 72 0"/><path class="rib" d="M86 126 q34 6 68 0"/></g>
+              <g class="bone-region hit" data-bone="Sternum" tabindex="0"><rect class="bone-fill" x="116" y="100" width="8" height="34" rx="3" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Spine" tabindex="0"><rect class="vert" x="116" y="100" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="108" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="116" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="124" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="132" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="140" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="148" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="156" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/><rect class="vert" x="116" y="164" width="8" height="6" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Pelvis" tabindex="0"><path class="bone-fill" d="M94 176 q26 20 52 0 v22 q-26 20-52 0z" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Sacrum/Coccyx" tabindex="0"><rect class="vert" x="118" y="170" width="4" height="16" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Left Humerus" tabindex="0"><rect x="56" y="106" width="12" height="56" rx="6" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Left Radius/Ulna" tabindex="0"><rect x="54" y="162" width="10" height="40" rx="5" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Left Hand" tabindex="0"><rect x="52" y="202" width="16" height="12" rx="3" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Right Humerus" tabindex="0"><rect x="172" y="106" width="12" height="56" rx="6" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Right Radius/Ulna" tabindex="0"><rect x="176" y="162" width="10" height="40" rx="5" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Right Hand" tabindex="0"><rect x="172" y="202" width="16" height="12" rx="3" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Left Femur" tabindex="0"><rect x="98" y="198" width="12" height="66" rx="6" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Right Femur" tabindex="0"><rect x="130" y="198" width="12" height="66" rx="6" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Left Patella" tabindex="0"><circle cx="104" cy="266" r="6" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Right Patella" tabindex="0"><circle cx="136" cy="266" r="6" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Left Tibia/Fibula" tabindex="0"><rect x="98" y="274" width="12" height="48" rx="5" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Right Tibia/Fibula" tabindex="0"><rect x="130" y="274" width="12" height="48" rx="5" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Left Foot" tabindex="0"><rect x="94" y="322" width="22" height="10" rx="4" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+              <g class="bone-region hit" data-bone="Right Foot" tabindex="0"><rect x="124" y="322" width="22" height="10" rx="4" class="bone-fill" fill="url(#boneGradientFemale)" stroke="#c4a888"/></g>
+
+              <!-- organ hotspots -->
+              <g class="region" data-part="Heart" tabindex="0"><rect class="halo" x="120" y="112" width="16" height="12" rx="3"/><rect class="outline" x="120" y="112" width="16" height="12" rx="3"/></g>
+              <g class="region" data-part="Lungs" tabindex="0"><rect class="halo" x="96" y="100" width="48" height="22" rx="6"/><rect class="outline" x="96" y="100" width="48" height="22" rx="6"/></g>
+              <g class="region" data-part="Stomach" tabindex="0"><rect class="halo" x="126" y="136" width="16" height="12" rx="4"/><rect class="outline" x="126" y="136" width="16" height="12" rx="4"/></g>
+              <g class="region" data-part="Kidneys" tabindex="0"><rect class="halo" x="98" y="146" width="44" height="12" rx="5"/><rect class="outline" x="98" y="146" width="44" height="12" rx="5"/></g>
+            </svg>
+          </div>
+
+          <!-- Right labels -->
+          <div class="labels right" id="labels-right">
+            <button data-part="Brain">Brain</button>
+            <button data-part="Ear">Ear</button>
+            <button data-part="Teeth">Teeth</button>
+            <button data-part="Heart" class="active">Heart</button>
+            <button data-part="Lungs">Lungs</button>
+            <button data-part="Elbow">Elbow</button>
+            <button data-part="Kidneys">Kidneys</button>
+            <button data-part="Stomach">Stomach</button>
+            <button data-part="Hip">Hip</button>
+            <button data-part="Knee">Knee</button>
+            <button data-part="Ankle">Ankle</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- MIDDLE: Departments -->
+      <section class="deptcol">
+        <div class="deptgrid" id="deptGrid"></div>.
+      </section>
+
+      <!-- RIGHT: Doctors -->
+      <section class="doccol">
+        <div class="filters">
+          <button class="chip active" data-docgender="Any">Any</button>
+          <button class="chip" data-docgender="Male">Male</button>
+          <button class="chip" data-docgender="Female">Female</button>
+        </div>
+        <div class="doclist" id="docList"></div>
+      </section>
+    </div>
+  </div>
+
+<script>
+  /* ================= DATA ================= */
+  const partToDepts = {
+    Eye:["Ophthalmology"], Nose:["ENT (Ear, Nose & Throat)"], Throat:["ENT (Ear, Nose & Throat)"],
+    Brain:["Neurology","Neurosurgery"], Ear:["ENT (Ear, Nose & Throat)"], Teeth:["Dentistry"],
+    Heart:["Cardiology","Cardiac Surgery"], Lungs:["Respiratory Medicine","Pulmonology"],
+    Liver:["Gastroenterology","Hepatology"], Kidneys:["Urology","Nephrology"],
+    Stomach:["Gastroenterology","General Surgery"],
+    Spine:["Orthopaedics","Neurosurgery"], "Lower Back":["Physical Medicine","Pain Clinic"],
+    Arm:["Orthopaedics"], Elbow:["Orthopaedics"], Hip:["Orthopaedics"], Thigh:["Orthopaedics"],
+    Knee:["Orthopaedics"], Ankle:["Orthopaedics","Podiatry"], Foot:["Podiatry","Orthopaedics"],
+    Skin:["Dermatology"],
+    Breast:["Gynecology","Oncology","General Surgery"],
+    Uterus:["Gynecology","Obstetrics"],
+    Ovaries:["Gynecology","Reproductive Medicine"]
+  };
+
+  const boneToDepts = {
+    "Skull":["Neurology","Neurosurgery"],
+    "Jaw":["Dentistry","Maxillofacial Surgery"],
+    "Clavicle":["Orthopaedics"], "Scapula":["Orthopaedics"],
+    "Ribcage":["Thoracic Surgery","Orthopaedics"], "Sternum":["Thoracic Surgery"],
+    "Cervical Spine":["Neurosurgery","Orthopaedics","Pain Clinic"],
+    "Spine":["Neurosurgery","Orthopaedics","Pain Clinic","Physical Medicine"],
+    "Pelvis":["Orthopaedics"], "Sacrum/Coccyx":["Orthopaedics","Pain Clinic"],
+    "Left Humerus":["Orthopaedics"], "Right Humerus":["Orthopaedics"],
+    "Left Radius/Ulna":["Orthopaedics"], "Right Radius/Ulna":["Orthopaedics"],
+    "Left Hand":["Orthopaedics"], "Right Hand":["Orthopaedics"],
+    "Left Femur":["Orthopaedics"], "Right Femur":["Orthopaedics"],
+    "Left Patella":["Orthopaedics"], "Right Patella":["Orthopaedics"],
+    "Left Tibia/Fibula":["Orthopaedics"], "Right Tibia/Fibula":["Orthopaedics"],
+    "Left Foot":["Podiatry","Orthopaedics"], "Right Foot":["Podiatry","Orthopaedics"]
+  };
+
+  const muscleToDepts = {
+    "Chest":["Physical Medicine","Sports Medicine","Orthopaedics"],
+    "Shoulders":["Physical Medicine","Sports Medicine","Orthopaedics"],
+    "Biceps":["Physical Medicine","Sports Medicine","Orthopaedics"],
+    "Abs":["Physical Medicine","Sports Medicine"],
+    "Quadriceps":["Physical Medicine","Sports Medicine","Orthopaedics"],
+    "Calves":["Physical Medicine","Sports Medicine","Orthopaedics"]
+  };
+
+  const doctors = [
+    {name:"Dr. Iftekhar Imam", title:"MBBS, MD (Gastroenterology)", dept:"Gastroenterology", img:"https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Prof. Dr. Touhidul Islam", title:"MBBS, FCPS (Medicine), MD", dept:"General Surgery", img:"https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Syeda Nur-E-Jannat", title:"MBBS, FCPS (Internal Medicine)", dept:"Nephrology", img:"https://images.unsplash.com/photo-1594824708207-0d83eb0a7030?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Jahangir Kabir", title:"MBBS, MS (CV & TS)", dept:"Cardiac Surgery", img:"https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Zarin Tasnim", title:"MBBS, FCPS (Cardiology)", dept:"Cardiology", img:"https://images.unsplash.com/photo-1551601651-bc60f254d532?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Tanvir Rahman", title:"MBBS, MS (Orthopaedics)", dept:"Orthopaedics", img:"https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Rafi Hossain", title:"MBBS, MS (Neurosurgery)", dept:"Neurosurgery", img:"https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Mahmudul Karim", title:"MBBS, MD (Respiratory)", dept:"Respiratory Medicine", img:"https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Sabrina Akter", title:"MBBS, DLO (ENT)", dept:"ENT (Ear, Nose & Throat)", img:"https://images.unsplash.com/photo-1594824708207-0d83eb0a7030?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Nusrat Nadiya", title:"MBBS, MS (Orthopaedics)", dept:"Orthopaedics", img:"https://images.unsplash.com/photo-1551601651-bc60f254d532?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Rashida Khan", title:"MBBS, FCPS (Gynecology)", dept:"Gynecology", img:"https://images.unsplash.com/photo-1594824708207-0d83eb0a7030?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Sultana Begum", title:"MBBS, MD (Obs & Gynae)", dept:"Obstetrics", img:"https://images.unsplash.com/photo-1551601651-bc60f254d532?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Fatema Rahman", title:"MBBS, FCPS (Reproductive)", dept:"Reproductive Medicine", img:"https://images.unsplash.com/photo-1594824708207-0d83eb0a7030?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Ahmed Hassan", title:"MBBS, MD (Sports Medicine)", dept:"Sports Medicine", img:"https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Maria Lopez", title:"MBBS, MD (Physical Medicine)", dept:"Physical Medicine", img:"https://images.unsplash.com/photo-1551601651-bc60f254d532?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Khalil Rahman", title:"MBBS, MD (Neurology)", dept:"Neurology", img:"https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Amina Khatun", title:"MBBS, MD (Dermatology)", dept:"Dermatology", img:"https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Mizanur Rahman", title:"MBBS, FCPS (Urology)", dept:"Urology", img:"https://images.unsplash.com/photo-1584467735871-8148df98c2fb?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Nasreen Akter", title:"MBBS, MD (Psychiatry)", dept:"Psychiatry", img:"https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Karim Uddin", title:"MBBS, FCPS (Ophthalmology)", dept:"Ophthalmology", img:"https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face", gender:"Male"},
+    {name:"Dr. Farhana Begum", title:"MBBS, MD (Pediatrics)", dept:"Pediatrics", img:"https://images.unsplash.com/photo-1594824708207-0d83eb0a7030?w=150&h=150&fit=crop&crop=face", gender:"Female"},
+    {name:"Dr. Belal Hossain", title:"MBBS, MD (Oncology)", dept:"Oncology", img:"https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face", gender:"Male"}
+  ];
+
+  /* ================= STATE/DOM ================= */
+  let bodyGender = "Male";
+  let currentDept = null;
+  let doctorGender = "Any";
+
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  const maleSvg = $("#male"), femaleSvg = $("#female");
+  const deptGrid = $("#deptGrid"), docList = $("#docList"), tooltip = $("#tooltip");
+  const live = $("#live");
+
+  const setActive = (nodes, el)=>{ nodes.forEach(n=>n.classList.remove("active")); if(el) el.classList.add("active"); };
+
+  /* ================= RENDERERS ================= */
+  // Booking modal function
+  function openBookingModal() {
+    alert('Booking functionality would open here. This would typically redirect to a booking page or open a modal.');
+  }
+
+  function renderDepts(items){
+    deptGrid.innerHTML="";
+    const list = items?.length ? items : ["Gastroenterology","Nephrology","Urology","Neurology","General Surgery","Respiratory Medicine","Orthopaedics"];
+    list.forEach((name,i)=>{
+      const card = document.createElement("button");
+      card.type="button"; card.className="dept"+(i===0?" active":"");
+      card.innerHTML = `<span>${name}</span>`;
+      card.onclick=()=>{ setActive($$(".dept",deptGrid), card); currentDept=name; live.textContent=`Department selected: ${name}`; renderDocs(); };
+      if(i===0){ currentDept=name; }
+      deptGrid.appendChild(card);
+    });
+    renderDocs();
+  }
+
+  function renderDocs(){
+    const filtered = doctors.filter(d => (!currentDept || d.dept===currentDept) && (doctorGender==="Any" || d.gender===doctorGender));
+    docList.innerHTML="";
+    if(!filtered.length){ docList.innerHTML = `<div class="empty">No doctors for <b>${currentDept??"All"}</b> (${doctorGender}).</div>`; return; }
+    filtered.sort((a,b)=>a.name.localeCompare(b.name)).forEach(d=>{
+      const card = document.createElement("div");
+      card.className="doccard";
+      card.innerHTML = `
+        <img class="avatar" src="${d.img}" alt="${d.name}">
+        <div class="docmeta"><div class="name">${d.name}</div><div class="sub">${d.title} • ${d.dept}</div></div>
+        <button class="book" type="button" aria-label="Book appointment with ${d.name}">Book Now</button>`;
+      docList.appendChild(card);
+    });
+  }
+
+  function showBodyGender(g){
+    bodyGender=g;
+    (g==="Male"?maleSvg:femaleSvg).classList.add("active");
+    (g==="Male"?femaleSvg:maleSvg).classList.remove("active");
+    live.textContent=`Body view: ${g}`;
+  }
+
+  /* ================= UTILS ================= */
+  function localXY(svg, evt){
+    // robust for SVG: use clientX/Y vs element rect
+    const rect = svg.getBoundingClientRect();
+    return { x: (evt.clientX||0) - rect.left, y: (evt.clientY||0) - rect.top, rect };
+  }
+  function moveTip(svg, evt){
+    const {x,y,rect} = localXY(svg, evt);
+    let left = x + 14; let top = y + 14;
+    const maxX = rect.width - 160; const maxY = rect.height - 40;
+    if(left > maxX) left = maxX; if(top > maxY) top = maxY;
+    tooltip.style.left = left + "px"; tooltip.style.top = top + "px";
+  }
+
+  /* ================= BINDERS ================= */
+  function bindBoneRegions(svg){
+    const bones = $$(".bone-region.hit", svg);
+    bones.forEach(region=>{
+      const name = region.dataset.bone;
+      region.addEventListener("pointerenter", e=>{
+        setActive(bones, region); tooltip.textContent = name; tooltip.style.opacity=1; tooltip.setAttribute("aria-hidden","false"); moveTip(svg, e);
+      });
+      region.addEventListener("pointermove", e=> moveTip(svg, e));
+      region.addEventListener("pointerleave", ()=>{ tooltip.style.opacity=0; tooltip.setAttribute("aria-hidden","true"); });
+      region.addEventListener("click", ()=>{
+        // Remove previous selections from all skeletons
+        $$(".bone-region").forEach(bone => {
+          bone.classList.remove("selected", "clicked");
+        });
+        
+        // Add click animation
+        region.classList.add("clicked");
+        setTimeout(() => region.classList.remove("clicked"), 300);
+        
+        // Mark as selected with enhanced visual feedback
+        region.classList.add("selected");
+        setActive(bones, region);
+        
+        // Enhanced tooltip for selection
+        tooltip.classList.add("selection-active");
+        tooltip.textContent = `✓ ${name} Selected`;
+        
+        const depts = boneToDepts[name] || [];
+        live.textContent = `Selected ${name} - ${depts.length} departments available`;
+        renderDepts(depts);
+        
+        // Reset tooltip after 2 seconds
+        setTimeout(() => {
+          tooltip.classList.remove("selection-active");
+        }, 2000);
+      });
+      region.addEventListener("keydown", e=>{
+        if(e.key==="Enter"||e.key===" "){ e.preventDefault(); region.click(); }
+        if(e.key==="Escape"){ tooltip.style.opacity=0; }
+      });
+    });
+  }
+
+  function bindOrganRegions(svg){
+    const regs = $$(".region", svg);
+    regs.forEach(r=>{
+      const part = r.dataset.part;
+      r.addEventListener("pointerenter", e=>{ setActive(regs, r); tooltip.textContent=part; tooltip.style.opacity=1; tooltip.setAttribute("aria-hidden","false"); moveTip(svg, e); });
+      r.addEventListener("pointermove", e=> moveTip(svg, e));
+      r.addEventListener("pointerleave", ()=>{ tooltip.style.opacity=0; tooltip.setAttribute("aria-hidden","true"); });
+      r.addEventListener("click", ()=>{
+        // Remove previous selections from all regions
+        $$(".region, .bone-region").forEach(el => {
+          el.classList.remove("selected", "clicked");
+        });
+        
+        // Add click animation
+        r.classList.add("clicked");
+        setTimeout(() => r.classList.remove("clicked"), 300);
+        
+        // Mark as selected
+        r.classList.add("selected");
+        setActive(regs, r);
+        
+        // Enhanced tooltip for selection
+        tooltip.classList.add("selection-active");
+        tooltip.textContent = `✓ ${part} Selected`;
+        
+        const depts = partToDepts[part] || [];
+        live.textContent = `Selected ${part} - ${depts.length} departments available`;
+        renderDepts(depts);
+        
+        // Reset tooltip after 2 seconds
+        setTimeout(() => {
+          tooltip.classList.remove("selection-active");
+        }, 2000);
+      });
+      r.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); r.click(); } if(e.key==="Escape"){ tooltip.style.opacity=0; } });
+    });
+  }
+
+  // side labels with enhanced selection feedback
+  $$(".labels button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const part = btn.dataset.part;
+      
+      // Remove previous selections
+      $$(".region, .bone-region, .labels button").forEach(el => {
+        el.classList.remove("selected", "clicked");
+      });
+      
+      // Mark button as selected
+      btn.classList.add("selected", "clicked");
+      setActive($$(".labels button"), btn);
+      
+      const depts = partToDepts[part] || [];
+      live.textContent=`Selected ${part} - ${depts.length} departments available`;
+      renderDepts(depts);
+      
+      // Find and highlight the corresponding body part
+      const svg = bodyGender==="Male"?maleSvg:femaleSvg;
+      const target = svg.querySelector(`.region[data-part="${part}"]`);
+      if(target) {
+        target.classList.add("selected");
+        setActive($$(".region", svg), target);
+        
+        // Enhanced tooltip
+        tooltip.classList.add("selection-active");
+        tooltip.textContent = `✓ ${part} Selected`;
+        tooltip.style.opacity = 1;
+        
+        setTimeout(() => {
+          tooltip.classList.remove("selection-active");
+          tooltip.style.opacity = 0;
+        }, 2000);
+      }
+      
+      // Remove click animation
+      setTimeout(() => btn.classList.remove("clicked"), 300);
+    });
+  });
+
+  // doctor gender filter
+  $$(".filters .chip").forEach(ch=>{
+    ch.addEventListener("click", ()=>{
+      setActive($$(".filters .chip"), ch);
+      doctorGender = ch.dataset.docgender;
+      renderDocs();
+    });
+  });
+
+  // Show gender toggle only on click
+  function showGenderToggle() {
+    document.querySelector('.genderToggle').style.display = 'flex';
+  }
+  // Hide gender toggle
+  function hideGenderToggle() {
+    document.querySelector('.genderToggle').style.display = 'none';
+  }
+
+  // Gender toggle button handlers
+  $$('#male-btn, #female-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      setActive($$('#male-btn, #female-btn'), e.target);
+      const gender = e.target.id === 'male-btn' ? 'Male' : 'Female';
+      showBodyGender(gender);
+      renderDepts(selectedPart ? getDeptsForPart(selectedPart) : []);
+    });
+  });
+
+  /* ================= INIT ================= */
+  (function init(){
+    showBodyGender("Male");
+    bindBoneRegions(maleSvg); bindBoneRegions(femaleSvg);
+    bindOrganRegions(maleSvg); bindOrganRegions(femaleSvg);
+    renderDepts(["Gastroenterology","Urology","Neurology","Respiratory Medicine","General Surgery","Orthopaedics"]);
+    maleSvg.focus();
+    // Gender toggle is always visible now
+  })();
+</script>
+</body>
+</html>
+

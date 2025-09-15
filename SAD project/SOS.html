@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency SOS - AmraAchi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary-color: #1a5276;
+            --secondary-color: #2980b9;
+            --accent-color: #27ae60;
+            --emergency-color: #e74c3c;
+            --epidemic-color: #c0392b;
+            --light-bg: #ecf0f1;
+            --dark-text: #2c3e50;
+            --section-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark-text);
+            background-color: var(--section-bg);
+        }
+        
+        /* Header Styles */
+        .emergency-header {
+            background-color: var(--emergency-color);
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white !important;
+        }
+        
+        .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Language Toggle */
+        .lang-toggle {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .lang-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* SOS Button Section */
+        .sos-section {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            padding: 40px 0;
+            color: white;
+            text-align: center;
+        }
+        
+        .sos-button-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        
+        .sos-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: white;
+            color: var(--emergency-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .sos-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .sos-button:hover::before {
+            opacity: 1;
+        }
+        
+        .sos-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .sos-button i {
+            font-size: 50px;
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+        
+        .sos-text {
+            z-index: 1;
+        }
+        
+        /* Pulse animation for SOS button */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(231, 76, 60, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+        
+        .sos-button {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Emergency Info Section */
+        .emergency-info-section {
+            padding: 40px 0;
+            background-color: white;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--emergency-color);
+            transition: all 0.3s;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-card h3 {
+            color: var(--emergency-color);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-card h3 i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .info-card p {
+            margin-bottom: 0;
+            color: var(--dark-text);
+        }
+        
+        /* Emergency Contacts */
+        .emergency-contacts {
+            padding: 40px 0;
+            background-color: var(--section-bg);
+        }
+        
+        .contact-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--emergency-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .contact-details {
+            flex-grow: 1;
+        }
+        
+        .contact-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--dark-text);
+        }
+        
+        .contact-relation {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .contact-number {
+            font-weight: 500;
+            color: var(--dark-text);
+        }
+        
+        .contact-action {
+            margin-left: 15px;
+        }
+        
+        .call-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .call-btn:hover {
+            background-color: #229954;
+            transform: translateY(-2px);
+        }
+        
+        .add-contact-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .add-contact-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Medical Information Section */
+        .medical-info-section {
+            padding: 40px 0;
+            background-color: white;
+        }
+        
+        .medical-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .medical-card h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .medical-card h3 i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .medical-info-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .medical-info-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light-bg);
+            display: flex;
+            align-items: center;
+        }
+        
+        .medical-info-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .medical-info-list li i {
+            color: var(--accent-color);
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .edit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+        
+        .edit-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Map Section */
+        .map-section {
+            padding: 40px 0;
+            background-color: var(--section-bg);
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Emergency Status Section */
+        .emergency-status-section {
+            padding: 40px 0;
+            background-color: white;
+            display: none;
+        }
+        
+        .emergency-status-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .status-card {
+            background: linear-gradient(135deg, var(--emergency-color), #c0392b);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .status-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .status-message {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .countdown {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+        
+        .cancel-btn {
+            background-color: white;
+            color: var(--emergency-color);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .cancel-btn:hover {
+            background-color: var(--light-bg);
+            transform: translateY(-3px);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px 0;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--light-bg);
+        }
+        
+        /* Responsive */
+        @media (max-width: 767px) {
+            .sos-button {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .sos-button i {
+                font-size: 40px;
+            }
+            
+            .contact-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .contact-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .contact-action {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Emergency Header -->
+    <header class="emergency-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="landing.html" class="btn back-btn">
+                    <i class="fas fa-arrow-left me-2"></i> 
+                    <span class="en-text">Back to Home</span>
+                    <span class="bn-text" style="display: none;">হোমে ফিরে যান</span>
+                </a>
+                <div class="navbar-brand">
+                    <span class="en-text">Emergency SOS</span>
+                    <span class="bn-text" style="display: none;">জরুরি এসওএস</span>
+                </div>
+                <button class="lang-toggle" id="langToggle">বাংলা</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SOS Button Section -->
+    <section class="sos-section">
+        <div class="container">
+            <h2 class="mb-4">
+                <span class="en-text">Emergency Assistance</span>
+                <span class="bn-text" style="display: none;">জরুরি সহায়তা</span>
+            </h2>
+            <p class="lead mb-4">
+                <span class="en-text">Press the SOS button below to request immediate emergency assistance</span>
+                <span class="bn-text" style="display: none;">অবিলম্বে জরুরি সহায়তার জন্য নীচের SOS বোতামটি চাপুন</span>
+            </p>
+            
+            <div class="sos-button-container">
+                <button class="sos-button" id="sosButton">
+                    <i class="fas fa-ambulance"></i>
+                    <span class="sos-text">
+                        <span class="en-text">SOS</span>
+                        <span class="bn-text" style="display: none;">এসওএস</span>
+                    </span>
+                </button>
+            </div>
+            
+            <p class="mt-4">
+                <span class="en-text">Your location will be shared with emergency services when you activate SOS</span>
+                <span class="bn-text" style="display: none;">আপনি SOS সক্রিয় করলে আপনার অবস্থান জরুরি পরিষেবাগুলির সাথে শেয়ার করা হবে</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- Emergency Info Section -->
+    <section class="emergency-info-section">
+        <div class="container">
+            <h2 class="text-center mb-4">
+                <span class="en-text">Emergency Information</span>
+                <span class="bn-text" style="display: none;">জরুরি তথ্য</span>
+            </h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h3><i class="fas fa-map-marker-alt"></i> 
+                            <span class="en-text">Your Location</span>
+                            <span class="bn-text" style="display: none;">আপনার অবস্থান</span>
+                        </h3>
+                        <p id="userLocation">
+                            <span class="en-text">Detecting your location...</span>
+                            <span class="bn-text" style="display: none;">আপনার অবস্থান সনাক্ত করা হচ্ছে...</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h3><i class="fas fa-hospital"></i> 
+                            <span class="en-text">Nearest Hospital</span>
+                            <span class="bn-text" style="display: none;">নিকটতম হাসপাতাল</span>
+                        </h3>
+                        <p id="nearestHospital">
+                            <span class="en-text">Finding nearest hospital...</span>
+                            <span class="bn-text" style="display: none;">নিকটতম হাসপাতাল খোঁজা হচ্ছে...</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h3><i class="fas fa-clock"></i> 
+                            <span class="en-text">Estimated Arrival Time</span>
+                            <span class="bn-text" style="display: none;">আনুমানিক আগমনের সময়</span>
+                        </h3>
+                        <p>
+                            <span class="en-text">8-12 minutes</span>
+                            <span class="bn-text" style="display: none;">৮-১২ মিনিট</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h3><i class="fas fa-phone-alt"></i> 
+                            <span class="en-text">Emergency Number</span>
+                            <span class="bn-text" style="display: none;">জরুরি নম্বর</span>
+                        </h3>
+                        <p>999 (<span class="en-text">National Emergency</span><span class="bn-text" style="display: none;">জাতীয় জরুরি</span>)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Emergency Contacts Section -->
+    <section class="emergency-contacts">
+        <div class="container">
+            <h2 class="text-center mb-4">
+                <span class="en-text">Emergency Contacts</span>
+                <span class="bn-text" style="display: none;">জরুরি যোগাযোগ</span>
+            </h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="contact-details">
+                            <div class="contact-name">Ahmed Rahman</div>
+                            <div class="contact-relation">
+                                <span class="en-text">Spouse</span>
+                                <span class="bn-text" style="display: none;">স্বামী/স্ত্রী</span>
+                            </div>
+                            <div class="contact-number">+880 1712 345678</div>
+                        </div>
+                        <div class="contact-action">
+                            <button class="call-btn">
+                                <i class="fas fa-phone me-2"></i> 
+                                <span class="en-text">Call</span>
+                                <span class="bn-text" style="display: none;">কল করুন</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="contact-details">
+                            <div class="contact-name">Fatima Khan</div>
+                            <div class="contact-relation">
+                                <span class="en-text">Parent</span>
+                                <span class="bn-text" style="display: none;">পিতামাতা</span>
+                            </div>
+                            <div class="contact-number">+880 1812 345678</div>
+                        </div>
+                        <div class="contact-action">
+                            <button class="call-btn">
+                                <i class="fas fa-phone me-2"></i> 
+                                <span class="en-text">Call</span>
+                                <span class="bn-text" style="display: none;">কল করুন</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="contact-details">
+                            <div class="contact-name">Dr. Mohammad Ali</div>
+                            <div class="contact-relation">
+                                <span class="en-text">Primary Care Physician</span>
+                                <span class="bn-text" style="display: none;">প্রাথমিক যত্ন চিকিৎসক</span>
+                            </div>
+                            <div class="contact-number">+880 1912 345678</div>
+                        </div>
+                        <div class="contact-action">
+                            <button class="call-btn">
+                                <i class="fas fa-phone me-2"></i> 
+                                <span class="en-text">Call</span>
+                                <span class="bn-text" style="display: none;">কল করুন</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button class="add-contact-btn">
+                            <i class="fas fa-plus-circle me-2"></i> 
+                            <span class="en-text">Add Emergency Contact</span>
+                            <span class="bn-text" style="display: none;">জরুরি যোগাযোগ যোগ করুন</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Medical Information Section -->
+    <section class="medical-info-section">
+        <div class="container">
+            <h2 class="text-center mb-4">
+                <span class="en-text">Your Medical Information</span>
+                <span class="bn-text" style="display: none;">আপনার চিকিৎসা তথ্য</span>
+            </h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="medical-card">
+                        <h3><i class="fas fa-heartbeat"></i> 
+                            <span class="en-text">Medical Conditions</span>
+                            <span class="bn-text" style="display: none;">চিকিৎসা অবস্থা</span>
+                        </h3>
+                        <ul class="medical-info-list">
+                            <li>
+                                <i class="fas fa-circle"></i>
+                                <span>
+                                    <span class="en-text">Hypertension (High Blood Pressure)</span>
+                                    <span class="bn-text" style="display: none;">উচ্চ রক্তচাপ</span>
+                                </span>
+                            </li>
+                            <li>
+                                <i class="fas fa-circle"></i>
+                                <span>
+                                    <span class="en-text">Diabetes Type 2</span>
+                                    <span class="bn-text" style="display: none;">ডায়াবেটিস টাইপ ২</span>
+                                </span>
+                            </li>
+                        </ul>
+                        <button class="edit-btn">
+                            <span class="en-text">Edit</span>
+                            <span class="bn-text" style="display: none;">সম্পাদনা করুন</span>
+                        </button>
+                    </div>
+                    
+                    <div class="medical-card">
+                        <h3><i class="fas fa-allergies"></i> 
+                            <span class="en-text">Allergies</span>
+                            <span class="bn-text" style="display: none;">অ্যালার্জি</span>
+                        </h3>
+                        <ul class="medical-info-list">
+                            <li>
+                                <i class="fas fa-circle"></i>
+                                <span>Penicillin</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-circle"></i>
+                                <span>
+                                    <span class="en-text">Shellfish</span>
+                                    <span class="bn-text" style="display: none;">শামুকজাতীয় খাবার</span>
+                                </span>
+                            </li>
+                        </ul>
+                        <button class="edit-btn">
+                            <span class="en-text">Edit</span>
+                            <span class="bn-text" style="display: none;">সম্পাদনা করুন</span>
+                        </button>
+                    </div>
+                    
+                    <div class="medical-card">
+                        <h3><i class="fas fa-pills"></i> 
+                            <span class="en-text">Current Medications</span>
+                            <span class="bn-text" style="display: none;">বর্তমান ওষুধ</span>
+                        </h3>
+                        <ul class="medical-info-list">
+                            <li>
+                                <i class="fas fa-circle"></i>
+                                <span>Metformin (500mg) - 
+                                    <span class="en-text">Twice daily</span>
+                                    <span class="bn-text" style="display: none;">দিনে দুইবার</span>
+                                </span>
+                            </li>
+                            <li>
+                                <i class="fas fa-circle"></i>
+                                <span>Lisinopril (10mg) - 
+                                    <span class="en-text">Once daily</span>
+                                    <span class="bn-text" style="display: none;">দিনে একবার</span>
+                                </span>
+                            </li>
+                        </ul>
+                        <button class="edit-btn">
+                            <span class="en-text">Edit</span>
+                            <span class="bn-text" style="display: none;">সম্পাদনা করুন</span>
+                        </button>
+                    </div>
+                    
+                    <div class="medical-card">
+                        <h3><i class="fas fa-tint"></i> 
+                            <span class="en-text">Blood Type</span>
+                            <span class="bn-text" style="display: none;">রক্তের গ্রুপ</span>
+                        </h3>
+                        <ul class="medical-info-list">
+                            <li>
+                                <i class="fas fa-circle"></i>
+                                <span>O+</span>
+                            </li>
+                        </ul>
+                        <button class="edit-btn">
+                            <span class="en-text">Edit</span>
+                            <span class="bn-text" style="display: none;">সম্পাদনা করুন</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map-section">
+        <div class="container">
+            <h2 class="text-center mb-4">
+                <span class="en-text">Nearby Medical Facilities</span>
+                <span class="bn-text" style="display: none;">নিকটবর্তী চিকিৎসা সুবিধা</span>
+            </h2>
+            <div id="map"></div>
+        </div>
+    </section>
+
+    <!-- Emergency Status Section (Hidden by default) -->
+    <section id="emergencyStatus" class="emergency-status-section">
+        <div class="container">
+            <div class="status-card">
+                <div class="status-icon">
+                    <i class="fas fa-ambulance"></i>
+                </div>
+                <h2 class="status-title">
+                    <span class="en-text">Emergency Alert Sent</span>
+                    <span class="bn-text" style="display: none;">জরুরি সতর্কতা পাঠানো হয়েছে</span>
+                </h2>
+                <p class="status-message">
+                    <span class="en-text">Help is on the way. Your location has been shared with emergency services.</span>
+                    <span class="bn-text" style="display: none;">সাহায্য আসছে। আপনার অবস্থান জরুরি পরিষেবাগুলির সাথে শেয়ার করা হয়েছে।</span>
+                </p>
+                <div class="countdown" id="countdown">08:45</div>
+                <p>
+                    <span class="en-text">Estimated time until help arrives</span>
+                    <span class="bn-text" style="display: none;">সাহায্য আসা পর্যন্ত আনুমানিক সময়</span>
+                </p>
+                <button class="cancel-btn" id="cancelEmergency">
+                    <span class="en-text">Cancel Emergency Request</span>
+                    <span class="bn-text" style="display: none;">জরুরি অনুরোধ বাতিল করুন</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <p>&copy; 2023 AmraAchi. 
+                        <span class="en-text">All rights reserved.</span>
+                        <span class="bn-text" style="display: none;">সর্বস্বত্ব সংরক্ষিত।</span>
+                    </p>
+                    <p>
+                        <span class="en-text">Emergency SOS Service</span>
+                        <span class="bn-text" style="display: none;">জরুরি এসওএস সেবা</span>
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html">
+                        <span class="en-text">Home</span>
+                        <span class="bn-text" style="display: none;">হোম</span>
+                    </a>
+                    <a href="#">
+                        <span class="en-text">Privacy Policy</span>
+                        <span class="bn-text" style="display: none;">গোপনীয়তা নীতি</span>
+                    </a>
+                    <a href="#">
+                        <span class="en-text">Terms of Service</span>
+                        <span class="bn-text" style="display: none;">সেবার শর্তাবলী</span>
+                    </a>
+                    <button class="lang-toggle" id="footerLangToggle">বাংলা</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Language Toggle
+        const langToggle = document.getElementById('langToggle');
+        const footerLangToggle = document.getElementById('footerLangToggle');
+        let isBangla = false;
+        
+        function toggleLanguage() {
+            isBangla = !isBangla;
+            const enTexts = document.querySelectorAll('.en-text');
+            const bnTexts = document.querySelectorAll('.bn-text');
+            
+            if (isBangla) {
+                enTexts.forEach(text => text.style.display = 'none');
+                bnTexts.forEach(text => text.style.display = 'inline');
+                langToggle.textContent = 'English';
+                footerLangToggle.textContent = 'English';
+            } else {
+                enTexts.forEach(text => text.style.display = 'inline');
+                bnTexts.forEach(text => text.style.display = 'none');
+                langToggle.textContent = 'বাংলা';
+                footerLangToggle.textContent = 'বাংলা';
+            }
+        }
+        
+        langToggle.addEventListener('click', toggleLanguage);
+        footerLangToggle.addEventListener('click', toggleLanguage);
+        
+        // Initialize map
+        let map;
+        let userLocation;
+        
+        // Mock hospital data
+        const hospitals = [
+            {
+                name: "United Hospital Limited",
+                address: "Plot 15, Road 71, Gulshan, Dhaka 1212",
+                lat: 23.7810,
+                lng: 90.4150,
+                phone: "+880 2-55034567"
+            },
+            {
+                name: "Popular Diagnostic Centre",
+                address: "House 16, Road 2, Dhanmondi, Dhaka 1205",
+                lat: 23.7465,
+                lng: 90.3760,
+                phone: "+880 2-55012345"
+            },
+            {
+                name: "Ibn Sina Diagnostic & Consultation Center",
+                address: "House 48, Road 27, Block K, Banani, Dhaka 1213",
+                lat: 23.7925,
+                lng: 90.4065,
+                phone: "+880 2-55098765"
+            }
+        ];
+        
+        // Function to calculate distance between two points in km
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the earth in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            const d = R * c; // Distance in km
+            return d;
+        }
+        
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+        
+        // Initialize map when page loads
+        window.onload = function() {
+            // Try to get user's location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        updateLocationInfo();
+                        initializeMap();
+                    },
+                    error => {
+                        // Default location if geolocation fails (Dhaka city center)
+                        userLocation = {
+                            lat: 23.8103,
+                            lng: 90.4125
+                        };
+                        updateLocationInfo();
+                        initializeMap();
+                    }
+                );
+            } else {
+                // Default location if geolocation is not supported
+                userLocation = {
+                    lat: 23.8103,
+                    lng: 90.4125
+                };
+                updateLocationInfo();
+                initializeMap();
+            }
+        };
+        
+        function updateLocationInfo() {
+            const locationText = isBangla 
+                ? `অক্ষাংশ: ${userLocation.lat.toFixed(4)}, দ্রাঘিমাংশ: ${userLocation.lng.toFixed(4)}`
+                : `Lat: ${userLocation.lat.toFixed(4)}, Lng: ${userLocation.lng.toFixed(4)}`;
+            
+            document.getElementById('userLocation').textContent = locationText;
+            
+            // Find nearest hospital
+            let nearestHospital = hospitals[0];
+            let minDistance = calculateDistance(
+                userLocation.lat, userLocation.lng,
+                hospitals[0].lat, hospitals[0].lng
+            );
+            
+            for (let i = 1; i < hospitals.length; i++) {
+                const distance = calculateDistance(
+                    userLocation.lat, userLocation.lng,
+                    hospitals[i].lat, hospitals[i].lng
+                );
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestHospital = hospitals[i];
+                }
+            }
+            
+            const hospitalText = isBangla
+                ? `${nearestHospital.name} (${minDistance.toFixed(2)} কিমি দূরে)`
+                : `${nearestHospital.name} (${minDistance.toFixed(2)} km away)`;
+            
+            document.getElementById('nearestHospital').textContent = hospitalText;
+        }
+        
+        function initializeMap() {
+            // Create map centered at user's location
+            map = L.map('map').setView([userLocation.lat, userLocation.lng], 13);
+            
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add user location marker
+            L.marker([userLocation.lat, userLocation.lng])
+                .addTo(map)
+                .bindPopup(isBangla ? 'আপনার অবস্থান' : 'Your Location')
+                .openPopup();
+            
+            // Add hospital markers
+            hospitals.forEach(hospital => {
+                L.marker([hospital.lat, hospital.lng])
+                    .addTo(map)
+                    .bindPopup(`
+                        <b>${hospital.name}</b><br>
+                        ${hospital.address}<br>
+                        ${isBangla ? 'ফোন: ' : 'Phone: '}${hospital.phone}
+                    `);
+            });
+        }
+        
+        // SOS Button functionality
+        const sosButton = document.getElementById('sosButton');
+        const emergencyStatus = document.getElementById('emergencyStatus');
+        const cancelEmergency = document.getElementById('cancelEmergency');
+        let countdownInterval;
+        
+        sosButton.addEventListener('click', () => {
+            // In a real application, this would send an emergency alert
+            emergencyStatus.classList.add('active');
+            
+            // Scroll to emergency status section
+            emergencyStatus.scrollIntoView({ behavior: 'smooth' });
+            
+            // Start countdown
+            let minutes = 8;
+            let seconds = 45;
+            updateCountdown(minutes, seconds);
+            
+            countdownInterval = setInterval(() => {
+                if (seconds === 0) {
+                    if (minutes === 0) {
+                        clearInterval(countdownInterval);
+                        document.getElementById('countdown').textContent = 
+                            isBangla ? "সাহায্য এসেছে!" : "Help has arrived!";
+                        return;
+                    }
+                    minutes--;
+                    seconds = 59;
+                } else {
+                    seconds--;
+                }
+                updateCountdown(minutes, seconds);
+            }, 1000);
+        });
+        
+        function updateCountdown(minutes, seconds) {
+            document.getElementById('countdown').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        cancelEmergency.addEventListener('click', () => {
+            emergencyStatus.classList.remove('active');
+            clearInterval(countdownInterval);
+        });
+        
+        // Call button functionality
+        document.querySelectorAll('.call-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const contactNumber = this.closest('.contact-card').querySelector('.contact-number').textContent;
+                // In a real application, this would initiate a call
+                alert(isBangla ? `${contactNumber} এ কল করা হচ্ছে...` : `Calling ${contactNumber}...`);
+            });
+        });
+        
+        // Add contact button functionality
+        document.querySelector('.add-contact-btn').addEventListener('click', () => {
+            // In a real application, this would open a form to add a new contact
+            alert(isBangla 
+                ? 'নতুন জরুরি যোগাযোগ যোগ করার কার্যকারিতা এখানে খুলবে' 
+                : 'Add new emergency contact functionality would open here');
+        });
+        
+        // Edit medical info buttons
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // In a real application, this would open a form to edit medical information
+                alert(isBangla 
+                    ? 'চিকিৎসা তথ্য সম্পাদনা কার্যকারিতা এখানে খুলবে' 
+                    : 'Edit medical information functionality would open here');
+            });
+        });
+    </script>
+</body>
+</html>
