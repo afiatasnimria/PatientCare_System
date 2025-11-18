@@ -1,2 +1,2 @@
 # PatientCare_System
-SAD lab project
+SAD lab project(Figma Model implemented)
