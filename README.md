@@ -1,28 +1,26 @@
 # PatientCare_System
-SAD lab project(Figma Model implemented)
+A high-fidelity UI/UX design and interactive prototype for a comprehensive healthcare platform, designed as a SAD (Software Analysis and Design) lab project. The system connects patients with essential medical services, real-time emergency support, and vital health alerts.
 
-A comprehensive healthcare platform designed to connect patients with essential medical services, providing real-time emergency support, appointment scheduling, and vital health alerts.
+Figma UI/UX Prototyping: Designed the complete, high-fidelity interfaces for both the native mobile (iOS/Android) and responsive web applications.
 
-Core Features
-Doctor & Nurse Booking: Allows patients to search, filter, and schedule appointments with a wide range of medical professionals based on specialty, availability, and location.
+Comprehensive Booking Flows: Includes detailed, multi-step user journeys for Doctor & Nurse Booking, allowing users to search/filter by specialty, view profiles, select time slots, and manage appointments.
 
-Find Hospital: A map-based utility for locating nearby hospitals, clinics, and pharmacies, complete with service details, ratings, and navigation.
+Integrated Emergency Suite:
 
-SOS Emergency: A dedicated one-touch emergency button that instantly alerts emergency contacts and services with the user's live location.
+SOS Emergency: A high-visibility, one-touch UI that instantly alerts contacts and services with the user's live location.
 
-Ambulance Service: An on-demand feature for requesting an ambulance, including dispatch confirmation and real-time ETA tracking.
+Ambulance Service: A complete flow from on-demand request and location confirmation to real-time dispatch tracking on a map.
 
-Epidemic Alerts: A public health module that pushes critical, geo-targeted warnings and updates about local outbreaks or health advisories.
+Innovative UI Components:
 
-Figma UI/UX Design
-High-fidelity, interactive prototypes for both the mobile (iOS/Android) and responsive web versions of the application were created using Figma. This design phase included building a complete component-based design system, mapping all user-centric flows for booking and emergencies, and creating clickable prototypes to simulate the full user journey for testing and demonstration.
+Interactive Skeleton: A unique graphical interface for both male and female models where users can click on a body part to find the relevant doctor or medical department.
 
-Key Design: 
--Interactive skeleton for both male and female that shows which doctor and department is for which body part 
--carousel window
--Scrollable map.
--flip cards.
--mobile and web both full complete design
+Dynamic Elements: Utilizes carousel windows (for featured doctors or alerts) and flip cards (for displaying provider information).
 
-How to use :
-Go to figma link-->copy the link-->run in browser-->in web run Flow 3-->for mobile run flow 22
+Geospatial Design: Features a map-based "Find Hospital" utility with a scrollable map to locate nearby hospitals, clinics, and pharmacies, complete with detailed info cards.
+
+Public Health Module: Designed the UI for pushing critical, geo-targeted Epidemic Alerts, including push notification templates and an in-app alert center.
+
+Complete Design System: A full library of reusable components (buttons, forms, cards, navigation) was built in Figma to ensure visual consistency and scalability.
+
+Interactive Prototypes: All screens are connected to simulate the full user journey. The primary user paths are demonstrated in Flow 22 (Mobile) and Flow 3 (Web) within the Figma file.
